@@ -1,189 +1,158 @@
 # ✨ Office AI Assistant
 
-Aplicación web que permite seleccionar **Word, Excel, PowerPoint o PDF**, escribir una pregunta y recibir una respuesta especializada generada por inteligencia artificial.
+[![Licencia](https://img.shields.io/badge/licencia-MIT-blue.svg)](LICENSE)
+[![Node.js](https://img.shields.io/badge/node-%3E%3D%2018.0.0-brightgreen.svg)](https://nodejs.org/)
+[![Tests](https://img.shields.io/badge/tests-11%2F11%20pass-success.svg)](tests/)
 
-El frontend es HTML + CSS + JavaScript puro; el backend Node.js/Express protege la clave de la API: **la clave nunca se envía al navegador**.
+Plataforma inteligente de productividad ofimática y análisis documental con interfaz moderna de tres paneles (estilo **NotebookLM**). Integra asistencia especializada para **Microsoft Word, Excel, PowerPoint y análisis de PDFs/Documentos**, impulsada por modelos de lenguaje de última generación (Google Gemini, OpenAI, Anthropic y Groq).
 
-```text
-Usuario → HTML/CSS/JS → /api/chat (tu backend) → API de IA → backend → usuario
-```
+> 📖 **¿Buscas el manual de usuario paso a paso?** Consulta el [**Manual de Usuario Completo**](MANUAL_DE_USUARIO.md) para aprender a usar cada herramienta, subir documentos y exportar reportes.
 
 ---
 
-## 1. Cómo ejecutarlo en tu computadora
+## 🌟 Características Principales
 
-Requisitos: Node.js 18 o superior.
+* **Diseño NotebookLM en 3 Paneles:**
+  * **Panel de Fuentes (Izquierda):** Gestor documental con soporte multi-archivo (+10 formatos: PDF, Word `.docx`/`.doc`, Excel `.xlsx`/`.xls`/`.csv`, PowerPoint `.pptx`/`.ppt`, OpenDocument `.odt`, Texto `.txt`, Imágenes `.png`/`.jpg`).
+  * **Lienzo de Chat (Centro):** Conversación fluida con renderizado Markdown enriquecido (bloques de código, tablas nativas, negritas, subtítulos), atajos de teclado y chips sugeridos.
+  * **Studio de Herramientas y Exportación (Derecha):** Selector de perfiles de IA (Word, Excel, PowerPoint, PDF), acciones rápidas de análisis y bandeja de exportación multiformato.
+* **Paneles Colapsables (Modo Enfoque):** Rieles laterales compactos de 52px que se ocultan y expanden con un solo clic.
+* **Motor de IA Pedagógico:** En lugar de respuestas telegráficas o prefabricadas, la IA actúa como un consultor sénior que desglosa la lógica paso a paso, entrega fórmulas bilingües (Español / Inglés), explica errores comunes y sugiere mejores prácticas.
+* **Exportación Profesional Multiformato:**
+  * **Excel real (`.xlsx`):** Conversión directa de tablas a hojas de cálculo con auto-ajuste de columnas vía SheetJS.
+  * **Word (`.doc`):** Descarga estructurada con formato editorial y estilos tipográficos.
+  * **PDF e Impresión Limpia:** Estilos `@media print` dedicados que eliminan el dashboard, las fuentes y los botones, imprimiendo únicamente el documento con salto de página natural y soporte para orientación horizontal y vertical.
+  * **Texto plano (`.txt`) y Copiado rápido al portapapeles.**
+* **Seguridad y Privacidad:** La clave de la API reside únicamente en el servidor; nunca se expone al navegador web.
+* **Modo Oscuro / Claro:** Detección de preferencia de sistema y conmutador manual persistente en `localStorage`.
+
+---
+
+## 🚀 Inicio Rápido (Local)
+
+### Requisitos previos
+* **Node.js** v18.0.0 o superior instalado.
+
+### Instalación en 3 pasos
 
 ```bash
+# 1. Clonar el repositorio
+git clone https://github.com/robertperez1-b/office-ai-assistant.git
 cd office-ai-assistant
+
+# 2. Instalar dependencias
 npm install
-cp .env.example .env      # y coloca tu clave en .env
-npm start                 # http://localhost:3000
+
+# 3. Configurar variables de entorno y ejecutar
+cp .env.example .env
+npm start
 ```
 
-Sin clave configurada la app arranca en **modo demostración**: la interfaz funciona completa, pero las respuestas son de ejemplo. Es útil para probar y hacer capturas sin gastar cuota.
+Abre tu navegador en `http://localhost:3000`.
 
-### Conseguir una clave (opción gratuita)
-
-**Google Gemini** — https://aistudio.google.com/apikey → crear clave gratis.
-
-En `.env`:
-
-```env
-AI_PROVIDER=gemini
-GEMINI_API_KEY=tu_clave_privada
-```
-
-Otras opciones: `openai`, `groq` (nivel gratuito), `anthropic`.
-Si dejas `AI_PROVIDER` vacío, el backend detecta el proveedor según la clave que encuentre.
+> **Nota:** Sin una clave de API configurada, la aplicación inicia en **Modo Demostración** con respuestas de ejemplo simuladas para probar la interfaz y los flujos de exportación.
 
 ---
 
-## 2. Estructura del proyecto
+## 🔑 Configuración de Proveedores de IA
+
+Puedes obtener una clave gratuita en **Google AI Studio** o utilizar tu proveedor preferido configurando el archivo `.env`:
+
+### Opción 1: Google Gemini (Recomendada y Gratuita)
+1. Obtén tu clave en: [Google AI Studio](https://aistudio.google.com/apikey).
+2. Configura tu `.env`:
+   ```env
+   AI_PROVIDER=gemini
+   GEMINI_API_KEY=tu_clave_de_gemini
+   GEMINI_MODEL=gemini-3.5-flash-lite
+   ```
+
+### Opción 2: OpenAI / Groq / Anthropic
+```env
+# OpenAI
+AI_PROVIDER=openai
+OPENAI_API_KEY=sk-...
+
+# Groq (Velocidad ultrarrápida, nivel gratuito)
+AI_PROVIDER=groq
+GROQ_API_KEY=gsk_...
+
+# Anthropic Claude
+AI_PROVIDER=anthropic
+ANTHROPIC_API_KEY=sk-ant-...
+```
+
+---
+
+## 📂 Arquitectura del Proyecto
 
 ```text
 office-ai-assistant/
 ├── public/
-│   ├── index.html        # Interfaz (selector, pregunta, respuesta)
-│   ├── styles.css        # Estilos, modo oscuro y diseño adaptable
-│   └── app.js            # Lógica del cliente: fetch, estados, copiar, descargar
+│   ├── index.html          # Interfaz 3 paneles NotebookLM
+│   ├── styles.css          # Estilos CSS modernos, modo oscuro e impresión limpia
+│   └── app.js              # Lógica de cliente: extracción de archivos, SheetJS, chat
 ├── src/
-│   ├── prompts.js        # Instrucciones especializadas por herramienta
-│   └── ai.js             # Cliente de IA (Gemini / OpenAI / Groq / Anthropic / demo)
+│   ├── prompts.js          # Prompts especializados y pedagógicos por herramienta
+│   └── ai.js               # Conector multimodelo (Gemini, OpenAI, Groq, Claude, Demo)
 ├── tests/
-│   └── api.test.js       # Pruebas automáticas del backend
-├── server.js             # Servidor Express: /api/chat, /api/health, validación
-├── .env.example          # Plantilla de variables de entorno
-├── .gitignore            # Excluye node_modules y .env
-├── vercel.json           # Configuración para desplegar en Vercel
-└── package.json
+│   └── api.test.js         # Suite de pruebas automatizadas (11/11 tests)
+├── MANUAL_DE_USUARIO.md    # Manual oficial y guía paso a paso para el usuario
+├── server.js               # Servidor Express, seguridad, rate limiting y endpoints
+├── vercel.json             # Manifiesto de despliegue para Vercel
+├── .env.example            # Plantilla de variables de entorno
+└── package.json            # Metadatos del proyecto y dependencias
 ```
 
 ---
 
-## 3. API del backend
+## 🧪 Pruebas Automatizadas
 
-### `POST /api/chat`
-
-```json
-{
-  "mode": "excel",
-  "question": "Genera una fórmula para calcular el promedio",
-  "history": [{ "role": "user", "content": "..." }]
-}
-```
-
-Respuesta correcta:
-
-```json
-{ "answer": "## Fórmula ...", "mode": "excel", "provider": "gemini", "demo": false }
-```
-
-Respuesta de error (siempre con mensaje comprensible y sin detalles técnicos):
-
-| Código | `code` | Mensaje al usuario |
-|---|---|---|
-| 400 | `empty_question` | Por favor, escribe una pregunta antes de continuar. |
-| 400 | `invalid_mode` | Selecciona una herramienta válida… |
-| 400 | `bad_json` | La solicitud no tiene un formato válido. |
-| 413 | `too_long` | La pregunta es demasiado larga… |
-| 429 | `rate_limit` | El servicio alcanzó temporalmente su límite de solicitudes… |
-| 502 / 504 | `auth`, `timeout`, `network` | Mensajes genéricos y seguros |
-| 500 | `server_error` | Ocurrió un error al generar la respuesta. |
-
-### `GET /api/health`
-
-Devuelve el proveedor activo y los modos disponibles. El frontend lo usa para mostrar la etiqueta «modo demostración».
-
----
-
-## 4. Funciones incluidas
-
-**Esenciales**
-- Campo de pregunta con contador de caracteres (máx. 8000) y validación de vacío.
-- Selector Word / Excel / PowerPoint / PDF con color propio por herramienta (y navegación con flechas del teclado).
-- Botón «Generar respuesta» con indicador de carga animado (esqueleto + puntos).
-- Área de respuesta con formato Markdown (títulos, listas, tablas, bloques de código).
-- Mensajes de error claros para pregunta vacía, timeout, límite de API, error de conexión y error de servidor.
-- Botón **Copiar** (con alternativa para navegadores sin permiso de portapapeles).
-- Botón **Limpiar** conversación.
-- Diseño adaptable: móvil, tablet y computadora.
-
-**Opcionales implementados**
-- Ejemplos de preguntas por herramienta (chips clicables).
-- Descargar la respuesta como `.txt`.
-- Modo oscuro (respeta la preferencia del sistema y se recuerda).
-- Historial de conversación enviado al backend para dar continuidad (últimos 8 mensajes).
-- Botón «Generar respuesta» se desactiva durante la solicitud y se bloquean duplicados.
-- `Ctrl + Enter` / `Cmd + Enter` para enviar.
-- Límite de solicitudes por IP (12/min por defecto) y timeout de 45 s en el servidor.
-
-**Pendiente para una segunda versión:** subir archivos PDF y extraer su texto, exportar la respuesta a PDF, inicio de sesión e historial persistente en base de datos.
-
----
-
-## 5. Pruebas
+El proyecto incluye pruebas unitarias y de integración que verifican las rutas del servidor, la validación de peticiones y la protección de credenciales:
 
 ```bash
 npm test
 ```
 
-Cubre: health, respuesta por modo, pregunta vacía, modo inválido, pregunta demasiado larga, JSON malformado, historial corrupto, ruta inexistente, entrega de la página y **verificación de que no se filtra ninguna clave al frontend**.
-
-Prueba manual rápida: abre la app, envía una pregunta por cada herramienta, prueba con el campo vacío, presiona varias veces el botón (no debe duplicar solicitudes), copia y descarga la respuesta, y cambia el tamaño de la ventana a 375 px de ancho.
-
----
-
-## 6. Despliegue
-
-### Opción recomendada: Render (backend + frontend juntos)
-
-1. Sube el proyecto a GitHub (verifica que `.env` **no** esté en el repositorio).
-2. En Render: *New → Web Service* → conecta el repositorio.
-3. Configuración:
-   - **Build Command:** `npm install`
-   - **Start Command:** `npm start`
-   - **Environment Variables:** `GEMINI_API_KEY` (o la de tu proveedor) y `AI_PROVIDER=gemini`
-4. Deploy. La URL pública queda lista; el frontend se sirve desde `public/` y la API desde el mismo dominio.
-
-### Opción Vercel
-
-El proyecto incluye `vercel.json`. Importa el repositorio, agrega `GEMINI_API_KEY` en *Settings → Environment Variables* y despliega. El frontend estático se sirve desde `public/` y `/api/chat` corre como función serverless (`server.js`).
-
-### Opción Railway
-
-*New Project → Deploy from GitHub*, agrega las variables de entorno y Railway detecta `npm start` automáticamente. El puerto se toma de `process.env.PORT`.
-
-> ⚠️ **Nunca** pongas la clave en `public/app.js` ni la subas en `.env`. `.gitignore` ya excluye `.env`, `node_modules` y `.vercel`.
+Salida esperada:
+```text
+✔ GET /api/health informa los modos disponibles
+✔ Pregunta de Word devuelve una respuesta
+✔ Pregunta de Excel devuelve fórmula
+✔ Pregunta vacía devuelve 400
+✔ Modo inválido devuelve 400
+✔ Pregunta demasiado larga devuelve 413
+✔ JSON malformado devuelve 400
+✔ Historial inválido no rompe la petición
+✔ Ruta de API inexistente devuelve 404 JSON
+✔ La página principal se sirve en /
+✔ La clave de API no aparece en el frontend
+# pass 11
+# fail 0
+```
 
 ---
 
-## 7. Criterios del MVP
+## 🌐 Despliegue en la Nube
 
-| Criterio | Estado |
-|---|---|
-| La interfaz funciona en computadora y móvil | ✅ |
-| El usuario puede seleccionar una herramienta | ✅ |
-| No se permiten preguntas vacías | ✅ |
-| La consulta llega correctamente al backend | ✅ |
-| El backend se conecta a la API de IA | ✅ (configurando la clave) |
-| La respuesta se muestra en pantalla | ✅ |
-| Los errores se comunican claramente | ✅ |
-| La clave de API no está expuesta | ✅ |
-| URL pública | ⏳ pendiente: haz el despliegue con los pasos de la sección 6 |
+### Opción A: Render (Recomendado - Backend y Frontend juntos)
+1. Conecta tu repositorio de GitHub en [Render.com](https://render.com).
+2. Selecciona **Web Service**:
+   * **Build Command:** `npm install`
+   * **Start Command:** `npm start`
+3. En la sección **Environment Variables**, añade:
+   * `AI_PROVIDER` = `gemini`
+   * `GEMINI_API_KEY` = *tu_clave_privada*
+4. Haz clic en **Deploy Web Service**.
+
+### Opción B: Vercel
+El repositorio incluye el archivo [`vercel.json`](vercel.json) preconfigurado para serverless functions.
+1. Importa el repositorio en [Vercel](https://vercel.com).
+2. Añade `GEMINI_API_KEY` en los ajustes de variables de entorno del proyecto.
+3. Despliega con un solo clic.
 
 ---
 
-## 8. Variables de entorno
+## 📄 Licencia
 
-| Variable | Descripción | Por defecto |
-|---|---|---|
-| `AI_PROVIDER` | `gemini`, `openai`, `groq`, `anthropic` o `demo` | autodetectado |
-| `GEMINI_API_KEY` / `OPENAI_API_KEY` / `GROQ_API_KEY` / `ANTHROPIC_API_KEY` | Claves privadas | — |
-| `GEMINI_MODEL` | Modelo de Gemini | `gemini-2.0-flash` |
-| `PORT` | Puerto del servidor | `3000` |
-| `MAX_QUESTION_CHARS` | Longitud máxima de la pregunta | `8000` |
-| `AI_TIMEOUT_MS` | Tiempo máximo de espera a la IA | `45000` |
-| `RATE_LIMIT_PER_MINUTE` | Solicitudes por IP por minuto | `12` |
-
-Hecho con HTML, CSS, JavaScript, Node.js y Express. Licencia MIT.
+Este proyecto está bajo la licencia MIT. Consulta el archivo [LICENSE](LICENSE) para más detalles.
