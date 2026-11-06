@@ -117,7 +117,7 @@ async function askGemini(system, question, history) {
     body: JSON.stringify({
       systemInstruction: { parts: [{ text: system }] },
       contents,
-      generationConfig: { temperature: 0.7, maxOutputTokens: 2048 },
+      generationConfig: { temperature: 0.7, maxOutputTokens: 8192 },
     }),
   });
 
@@ -146,7 +146,7 @@ async function askOpenAICompatible({ system, question, history, baseURL, apiKey,
       model,
       messages,
       temperature: 0.7,
-      max_tokens: 2048,
+      max_tokens: 4096,
     }),
   });
 
@@ -168,7 +168,7 @@ async function askAnthropic(system, question, history) {
     },
     body: JSON.stringify({
       model: process.env.ANTHROPIC_MODEL || "claude-3-5-haiku-latest",
-      max_tokens: 2048,
+      max_tokens: 4096,
       system,
       messages: [
         ...history.map((h) => ({ role: h.role, content: h.content })),
