@@ -1,0 +1,29 @@
+{
+  "name": "office-ai-assistant",
+  "version": "1.0.0",
+  "description": "Office AI Assistant - Asistente de IA para Word, Excel, PowerPoint y PDF",
+  "main": "server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "ai",
+    "office",
+    "assistant",
+    "express",
+    "gemini",
+    "openai"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0"
+  }
+}

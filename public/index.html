@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Office AI Assistant: asistente de IA para Word, Excel, PowerPoint y PDF." />
+  <title>Office AI Assistant — Tu asistente para documentos</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%E2%9C%A8%3C/text%3E%3C/svg%3E" />
+  <!-- CDN libs para procesamiento de múltiples formatos (PDF, Word, Excel, exportación) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+<body data-mode="word">
+  <a class="skip-link" href="#pregunta">Saltar al formulario</a>
+
+  <div class="app-layout">
+    <!-- BARRA SUPERIOR -->
+    <header class="navbar">
+      <div class="navbar-left">
+        <button class="nav-icon-btn mobile-toggle" id="mobileToggleLeft" aria-label="Abrir fuentes">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <div class="navbar-brand">
+          <div class="brand-avatar" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 3l1.9 4.6L18.5 9.5l-4.6 1.9L12 16l-1.9-4.6L5.5 9.5l4.6-1.9L12 3z"/>
+              <path d="M18 15.5l.9 2.1 2.1.9-2.1.9-.9 2.1-.9-2.1-2.1-.9 2.1-.9.9-2.1z"/>
+            </svg>
+          </div>
+          <span class="brand-title">Office AI Assistant</span>
+        </div>
+      </div>
+
+      <div class="navbar-right">
+        <button id="themeBtn" class="nav-btn" type="button" aria-label="Modo visual" title="Modo claro / oscuro">
+          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M19.1 4.9l-1.4 1.4M6.3 17.7l-1.4 1.4"/></svg>
+          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A8.5 8.5 0 1111.2 3a7 7 0 009.8 9.8z"/></svg>
+        </button>
+        <button id="clearBtn" class="nav-btn danger" type="button" disabled title="Limpiar sesión">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+          <span>Limpiar</span>
+        </button>
+        <button class="nav-icon-btn mobile-toggle" id="mobileToggleRight" aria-label="Abrir Studio">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- WORKSPACE 3 COLUMNAS -->
+    <div class="workspace">
+
+      <!-- PANEL IZQUIERDO: FUENTES -->
+      <aside class="panel panel-left" id="panelLeft">
+        <div class="panel-header">
+          <div class="panel-title-wrap">
+            <h2 class="panel-title">Fuentes</h2>
+            <span id="sourcesCounterBadge" class="sources-count-badge" hidden>0</span>
+          </div>
+          <div class="panel-header-actions">
+            <button id="clearSourcesBtn" class="panel-action-link" type="button" hidden title="Quitar todas las fuentes">Vaciar</button>
+            <button class="panel-toggle-btn" id="toggleLeftBtn" title="Alternar panel" aria-label="Colapsar panel izquierdo">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- RIEL VERTICAL IZQUIERDO COLAPSADO (Fuentes accesibles) -->
+        <div class="panel-rail" id="railLeft" aria-label="Acciones de fuentes">
+          <button type="button" class="rail-btn" id="railAddSourceBtn" title="Añadir fuentes">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          </button>
+          <button type="button" class="rail-btn" id="railExpandLeftBtn" title="Ver fuentes guardadas">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            <span id="railSourcesCount" class="rail-counter" hidden>0</span>
+          </button>
+        </div>
+
+        <div class="panel-body">
+          <input type="file" id="pdfFileInput" multiple accept=".pdf,.docx,.doc,.odt,.xlsx,.xls,.csv,.pptx,.ppt,.txt,.png,.jpg,.jpeg" hidden />
+          
+          <button type="button" class="btn-add-source" id="addSourceBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            <span>Añadir fuentes</span>
+          </button>
+
+          <!-- Zona de arrastre multiformato -->
+          <div id="pdfDropzone" class="source-dropzone" tabindex="0" role="button" aria-label="Arrastrar archivos aquí">
+            <span class="dropzone-label">Suelta documentos o imágenes aquí</span>
+            <span class="dropzone-formats">PDF, Word, Excel, PPT, TXT, CSV, JPG, PNG</span>
+          </div>
+
+          <!-- Lista de fuentes agregadas -->
+          <div id="sourceList" class="source-list"></div>
+
+          <!-- Estado vacío cuando no hay fuentes -->
+          <div id="sourceEmpty" class="source-empty">
+            <div class="source-empty-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <line x1="16" y1="13" x2="8" y2="13"/>
+                <line x1="16" y1="17" x2="8" y2="17"/>
+                <polyline points="10 9 9 9 8 9"/>
+              </svg>
+            </div>
+            <p class="source-empty-text">Las fuentes guardadas aparecerán aquí.</p>
+            <p class="source-empty-sub">Sube hasta más de 10 documentos (PDF, Word, Excel, PPT, imágenes o texto) para analizarlos en conjunto con IA.</p>
+            <button type="button" class="source-empty-link" id="emptyAddLink">Añadir fuentes</button>
+          </div>
+        </div>
+      </aside>
+
+      <!-- PANEL CENTRAL: CHAT / LIENZO -->
+      <main class="center-pane" id="centerPane">
+
+        <!-- Mensaje de bienvenida inicial (NotebookLM style) -->
+        <div id="chatWelcome" class="chat-welcome">
+          <div class="welcome-wave" aria-hidden="true">👋</div>
+          <h1 class="welcome-title">Vamos a empezar con tu asistente…</h1>
+          <p class="welcome-subtitle">
+            Este es tu lienzo para entender, crear o profundizar en tus documentos.
+            Selecciona una herramienta a la derecha o escribe tu consulta abajo.
+          </p>
+
+          <p class="welcome-prompt-label">¿Qué te gustaría hacer hoy?</p>
+          <div class="welcome-chips">
+            <button type="button" class="welcome-chip" data-query="Redacta una propuesta formal para presentar a un cliente de forma clara y profesional.">
+              Redactar un documento formal
+            </button>
+            <button type="button" class="welcome-chip" data-query="Explica cómo crear una fórmula condicional SI en Excel con un ejemplo práctico.">
+              Fórmula o cálculo en Excel
+            </button>
+            <button type="button" class="welcome-chip" data-query="Crea un esquema de 6 diapositivas para una presentación de alto impacto.">
+              Estructurar una presentación
+            </button>
+            <button type="button" class="welcome-chip" data-query="¿Cómo puedo resumir y extraer los puntos clave de un archivo PDF?">
+              Analizar o resumir un PDF
+            </button>
+          </div>
+        </div>
+
+        <!-- Área de salida de la respuesta de la IA -->
+        <div id="output" class="chat-output" aria-live="polite" aria-busy="false" hidden></div>
+
+        <!-- Barra inferior de entrada (exclusiva para preguntar) -->
+        <div class="chat-input-bar">
+          <div class="input-box-wrapper">
+            <textarea id="pregunta" rows="1" maxlength="60000" spellcheck="true"
+              placeholder="Haz una pregunta o crea algo…"></textarea>
+            
+            <div class="input-actions-inside">
+              <button id="sendBtn" class="send-round-btn" type="button" aria-label="Generar respuesta">
+                <span class="btn-spinner" aria-hidden="true"></span>
+                <svg class="send-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="12" y1="19" x2="12" y2="5"/>
+                  <polyline points="5 12 12 5 19 12"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="input-meta-bar">
+            <div class="examples" id="examples" aria-label="Sugerencias de prompts">
+              <span class="examples-label">Sugerencias:</span>
+            </div>
+            <div class="meta-right">
+              <span id="counter" class="counter">0 / 60000</span>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <!-- PANEL DERECHO: STUDIO / HERRAMIENTAS -->
+      <aside class="panel panel-right" id="panelRight">
+        <div class="panel-header">
+          <h2 class="panel-title">Studio</h2>
+          <button class="panel-toggle-btn" id="toggleRightBtn" title="Alternar panel" aria-label="Colapsar panel derecho">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="15" y1="3" x2="15" y2="21"/></svg>
+          </button>
+        </div>
+
+        <!-- RIEL VERTICAL DERECHO COLAPSADO (Herramientas accesibles sin perderse) -->
+        <div class="panel-rail" id="railRight" aria-label="Herramientas rápidas">
+          <button type="button" class="rail-btn" data-rail-mode="word" title="Word (Redacción)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          </button>
+          <button type="button" class="rail-btn" data-rail-mode="excel" title="Excel (Fórmulas y Tablas)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg>
+          </button>
+          <button type="button" class="rail-btn" data-rail-mode="powerpoint" title="PowerPoint (Presentaciones)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="12" rx="2"/><line x1="12" y1="16" x2="12" y2="20"/><line x1="8" y1="20" x2="16" y2="20"/></svg>
+          </button>
+          <button type="button" class="rail-btn" data-rail-mode="pdf" title="PDF (Análisis de Documentos)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M9 17v-4h1.7a1.5 1.5 0 0 1 0 3H9"/></svg>
+          </button>
+          <div class="rail-divider"></div>
+          <button type="button" class="rail-btn" id="railExportBtn" title="Exportar respuesta a Excel / Word / PDF">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          </button>
+          <button type="button" class="rail-btn" id="railCopyBtn" title="Copiar respuesta">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M15 5.5A1.5 1.5 0 0013.5 4H6a2 2 0 00-2 2v7.5A1.5 1.5 0 005.5 15"/></svg>
+          </button>
+        </div>
+
+        <div class="panel-body">
+          <!-- Selector de herramientas en Grid 2x2 -->
+          <div class="studio-section">
+            <span class="studio-section-label">Herramienta</span>
+            <div class="modes-grid" role="radiogroup" aria-label="Herramienta seleccionada">
+              <button class="mode-card" type="button" role="radio" aria-checked="true" data-mode="word" tabindex="0">
+                <div class="mode-icon-box word" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                </div>
+                <div class="mode-info">
+                  <strong>Word</strong>
+                  <span>Redacción</span>
+                </div>
+              </button>
+
+              <button class="mode-card" type="button" role="radio" aria-checked="false" data-mode="excel" tabindex="-1">
+                <div class="mode-icon-box excel" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg>
+                </div>
+                <div class="mode-info">
+                  <strong>Excel</strong>
+                  <span>Fórmulas</span>
+                </div>
+              </button>
+
+              <button class="mode-card" type="button" role="radio" aria-checked="false" data-mode="powerpoint" tabindex="-1">
+                <div class="mode-icon-box powerpoint" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="12" rx="2"/><line x1="12" y1="16" x2="12" y2="20"/><line x1="8" y1="20" x2="16" y2="20"/></svg>
+                </div>
+                <div class="mode-info">
+                  <strong>PowerPoint</strong>
+                  <span>Diapositivas</span>
+                </div>
+              </button>
+
+              <button class="mode-card" type="button" role="radio" aria-checked="false" data-mode="pdf" tabindex="-1">
+                <div class="mode-icon-box pdf" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M9 17v-4h1.7a1.5 1.5 0 0 1 0 3H9"/></svg>
+                </div>
+                <div class="mode-info">
+                  <strong>PDF</strong>
+                  <span>Análisis</span>
+                </div>
+              </button>
+            </div>
+          </div>
+
+          <!-- Acciones Rápidas con las fuentes cargadas -->
+          <div id="pdfQuickSection" class="studio-section" hidden>
+            <span class="studio-section-label">Acciones con las fuentes</span>
+            <div class="quick-chips-grid">
+              <button type="button" class="action-tile" id="chipSummarizePdf">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="21" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="21" y1="18" x2="3" y2="18"/></svg>
+                <span>Resumir fuentes</span>
+              </button>
+              <button type="button" class="action-tile" id="chipKeyPointsPdf">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                <span>Puntos clave</span>
+              </button>
+              <button type="button" class="action-tile" id="chipConvertToWord">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>
+                <span>Exportar a Word</span>
+              </button>
+              <button type="button" class="action-tile" id="chipConvertToTxt">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 4v10M8 11l4 4 4-4M5 19h14"/></svg>
+                <span>Exportar a .txt</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Exportar y acciones sobre la respuesta -->
+          <div class="studio-section">
+            <span class="studio-section-label">Exportar / Acciones</span>
+            <div class="export-actions-grid">
+              <button id="exportPdfBtn" class="studio-btn" type="button" disabled title="Exportar como PDF">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg>
+                <span>PDF</span>
+              </button>
+              <button id="exportWordBtn" class="studio-btn" type="button" disabled title="Exportar como Word">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M8.5 12h7M8.5 16h4.5"/></svg>
+                <span>Word</span>
+              </button>
+              <button id="exportExcelBtn" class="studio-btn" type="button" disabled title="Exportar como Excel">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg>
+                <span>Excel</span>
+              </button>
+              <button id="downloadBtn" class="studio-btn" type="button" disabled title="Descargar como .txt">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 4v10M8 11l4 4 4-4M5 19h14"/></svg>
+                <span>.txt</span>
+              </button>
+            </div>
+
+            <div class="secondary-actions-stack">
+              <button id="copyBtn" class="studio-btn-wide" type="button" disabled title="Copiar al portapapeles">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M15 5.5A1.5 1.5 0 0013.5 4H6a2 2 0 00-2 2v7.5A1.5 1.5 0 005.5 15"/></svg>
+                <span>Copiar respuesta</span>
+              </button>
+              <button id="printBtn" class="studio-btn-wide" type="button" disabled title="Imprimir respuesta">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                <span>Imprimir</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Pie del Studio -->
+          <div class="studio-footer">
+            <span id="providerBadge" class="badge" hidden></span>
+          </div>
+        </div>
+      </aside>
+
+    </div>
+  </div>
+
+  <!-- Toast de notificaciones -->
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
