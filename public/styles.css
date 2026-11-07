@@ -76,6 +76,7 @@ body.light-theme {
 
 html, body {
   height: 100%;
+  height: 100dvh;
   width: 100%;
   overflow: hidden;
   font-family: var(--font-sans);
@@ -104,7 +105,9 @@ html, body {
   display: flex;
   flex-direction: column;
   height: 100vh;
+  height: 100dvh;
   width: 100vw;
+  max-width: 100vw;
   overflow: hidden;
 }
 
@@ -221,8 +224,10 @@ body.light-theme .icon-moon { display: none; }
   display: flex;
   flex: 1;
   height: calc(100vh - 52px);
+  height: calc(100dvh - 52px);
   overflow: hidden;
   position: relative;
+  width: 100%;
 }
 
 /* Paneles laterales */
@@ -1311,27 +1316,102 @@ body.light-theme .icon-moon { display: none; }
   color: #f87171;
 }
 
+/* Visibilidad adaptativa */
+.desktop-only {
+  display: flex;
+}
+.mobile-only {
+  display: none !important;
+}
+
+/* Barra de herramientas móvil (oculta en escritorio) */
+.mobile-tool-bar {
+  display: none;
+}
+
+/* Barra rápida de exportación para móvil */
+.mobile-actions-bar {
+  display: none;
+}
+
+/* Telón de fondo para paneles deslizantes en móvil */
+.mobile-backdrop {
+  display: none;
+}
+
+/* Contenedor de tablas para desplazamiento horizontal táctil fluido */
+.table-container {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: 14px 0;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-panel-subtle);
+}
+.table-container table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 480px;
+  margin: 0 !important;
+}
+
 /* ===========================================================
    RESPONSIVE DESIGN (TABLET & MOBILE)
    =========================================================== */
 @media (max-width: 900px) {
+  .desktop-only {
+    display: none !important;
+  }
+  .mobile-only {
+    display: flex !important;
+  }
+
   .nav-icon-btn.mobile-toggle {
     display: flex;
   }
 
+  /* Telón de fondo oscuro translúcido */
+  .mobile-backdrop {
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh;
+    background: rgba(0, 0, 0, 0.65);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+    z-index: 90;
+  }
+  .mobile-backdrop.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* Paneles deslizantes laterales en móvil con z-index superior */
   .panel {
-    position: absolute;
+    position: fixed;
     top: 0;
     bottom: 0;
     height: 100%;
-    box-shadow: var(--shadow-md);
+    height: 100dvh;
+    width: 320px !important;
+    max-width: 86vw !important;
+    box-shadow: 0 0 28px rgba(0, 0, 0, 0.7);
     background: var(--bg-navbar);
+    z-index: 100;
+    transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .panel-left {
     left: 0;
-    transform: translateX(-100%);
-    width: 280px;
+    transform: translateX(-105%);
   }
   .panel-left.mobile-open {
     transform: translateX(0);
@@ -1339,16 +1419,216 @@ body.light-theme .icon-moon { display: none; }
 
   .panel-right {
     right: 0;
-    transform: translateX(100%);
-    width: 290px;
+    transform: translateX(105%);
   }
   .panel-right.mobile-open {
     transform: translateX(0);
   }
 
-  .chat-output, .chat-input-bar {
-    padding-left: 16px;
-    padding-right: 16px;
+  /* En móvil no colapsar nunca los paneles a rieles de 52px */
+  .panel.collapsed-left,
+  .panel.collapsed-right {
+    width: 320px !important;
+    max-width: 86vw !important;
+  }
+  .panel.collapsed-left .panel-body,
+  .panel.collapsed-right .panel-body {
+    display: flex !important;
+  }
+  .panel.collapsed-left .panel-rail,
+  .panel.collapsed-right .panel-rail {
+    display: none !important;
+  }
+  .panel.collapsed-left .panel-header .panel-title-wrap,
+  .panel.collapsed-left .panel-header .panel-action-link,
+  .panel.collapsed-right .panel-header .panel-title {
+    display: flex !important;
+  }
+
+  .panel-close-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-sm);
+    background: var(--bg-panel-subtle);
+    border: 1px solid var(--border-subtle);
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .panel-close-btn:hover {
+    color: var(--text-main);
+    background: var(--bg-panel-hover);
+  }
+  .panel-close-btn svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  /* Barra de herramientas móvil visible en la cabecera del chat */
+  .mobile-tool-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    padding: 7px 10px;
+    background: var(--bg-navbar);
+    border-bottom: 1px solid var(--border-subtle);
+    flex-shrink: 0;
+    z-index: 5;
+  }
+
+  .mobile-tool-btn {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 6px 4px;
+    border-radius: var(--radius-sm);
+    background: var(--bg-panel-subtle);
+    border: 1px solid var(--border-subtle);
+    color: var(--text-muted);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .mtool-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+  }
+  .dot-word { background: var(--color-word); }
+  .dot-excel { background: var(--color-excel); }
+  .dot-ppt { background: var(--color-ppt); }
+  .dot-pdf { background: var(--color-pdf); }
+
+  .mobile-tool-btn[data-mobile-mode="word"].active {
+    background: var(--color-word-bg);
+    color: var(--color-word);
+    border-color: var(--color-word);
+  }
+  .mobile-tool-btn[data-mobile-mode="excel"].active {
+    background: var(--color-excel-bg);
+    color: var(--color-excel);
+    border-color: var(--color-excel);
+  }
+  .mobile-tool-btn[data-mobile-mode="powerpoint"].active {
+    background: var(--color-ppt-bg);
+    color: var(--color-ppt);
+    border-color: var(--color-ppt);
+  }
+  .mobile-tool-btn[data-mobile-mode="pdf"].active {
+    background: var(--color-pdf-bg);
+    color: var(--color-pdf);
+    border-color: var(--color-pdf);
+  }
+
+  /* Barra rápida de acciones de exportación en móvil */
+  .mobile-actions-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    gap: 6px;
+    padding: 6px 12px;
+    background: var(--bg-panel-subtle);
+    border-top: 1px solid var(--border-subtle);
+    border-bottom: 1px solid var(--border-subtle);
+    flex-shrink: 0;
+  }
+  .m-action-btn {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    padding: 7px 4px;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-main);
+    background: var(--bg-panel);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .m-action-btn svg {
+    width: 14px;
+    height: 14px;
+  }
+  .m-action-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  /* Ajustes de chat en móvil */
+  .chat-output {
+    padding: 12px 14px 16px;
+    gap: 12px;
+  }
+  .chat-input-bar {
+    padding: 8px 12px 10px;
+    gap: 6px;
+  }
+  #pregunta {
+    font-size: 15px; /* Evita zoom automático en Safari iOS */
+    padding: 10px 44px 10px 12px;
+  }
+
+  .examples {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    gap: 6px;
+    scrollbar-width: none;
+    padding-bottom: 2px;
+  }
+  .examples::-webkit-scrollbar {
+    display: none;
+  }
+  .chip {
+    flex-shrink: 0;
+    white-space: nowrap;
+    font-size: 11px;
+    padding: 4px 10px;
+  }
+
+  .welcome-title {
+    font-size: 18px;
+  }
+  .welcome-subtitle {
+    font-size: 12px;
+    margin-bottom: 12px;
+  }
+  .welcome-chip {
+    font-size: 12px;
+    padding: 8px 12px;
+  }
+}
+
+@media (max-width: 500px) {
+  .navbar {
+    padding: 0 8px;
+  }
+  .brand-title {
+    font-size: 13px;
+    max-width: 125px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  #clearBtn .btn-text {
+    display: none;
+  }
+  #clearBtn {
+    padding: 6px 8px;
+  }
+  .navbar-left, .navbar-right {
+    gap: 6px;
   }
 }
 

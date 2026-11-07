@@ -232,7 +232,7 @@
       if (line.includes("|") && /^\|?\s*:?-{2,}:?\s*(\|\s*:?-{2,}:?\s*)*\|?$/.test((lines[i + 1] || "").trim())) {
         closeAll();
         const header = splitRow(line);
-        out.push("<table><thead><tr>" + header.map((c) => `<th>${inline(c)}</th>`).join("") + "</tr></thead><tbody>");
+        out.push('<div class="table-container"><table><thead><tr>' + header.map((c) => `<th>${inline(c)}</th>`).join("") + "</tr></thead><tbody>");
         inTable = true;
         i++;
         continue;
